@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 use function Ramsey\Uuid\v1;
 use DB;
+use App\Question;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PertanyaanController extends Controller
 {
@@ -17,9 +19,10 @@ class PertanyaanController extends Controller
      */
     public function index()
     {
-        $datas = DB::table('questions')
-                ->join('profiles','questions.profile_id','=','profiles.profile_id')
-                ->get();
+        // $datas = DB::table('questions')
+        //         ->join('profiles','questions.profile_id','=','profiles.profile_id')
+        //         ->get();
+        $datas = Question::all();
         return view("ListPertanyaan", ['datas'=> $datas]);
     }
 
@@ -46,12 +49,26 @@ class PertanyaanController extends Controller
             'pertanyaan' => 'required',
             'profileId' => 'required'
         ]);
-        $query = DB::table('questions')->insert(
-                ['title' => $request['title'],
-                'question' => $request['pertanyaan'],
-                'profile_id' => $request['profileId']
-                ]
-                );
+
+        // $question = new Question;
+        // $question->title = $request["title"];
+        // $question->question = $request["pertanyaan"];
+        // $question->profile_id = $request["profileId"];
+        // $question->save();
+
+        // $query = DB::table('questions')->insert(
+        //         ['title' => $request['title'],
+        //         'question' => $request['pertanyaan'],
+        //         'profile_id' => $request['profileId']
+        //         ]
+        //         );
+
+        $question = Question::create([
+            'title' => $request['title'],
+            'question' => $request['pertanyaan'],
+            'profile_id' => $request['profileId']
+        ]);
+
         return redirect('/pertanyaan')->with('success','Pertanyaan Berhasil Disimpan');
     }
 
@@ -63,10 +80,12 @@ class PertanyaanController extends Controller
      */
     public function show($id)
     {
-        $data = DB::table('questions')
-                ->join('profiles','questions.profile_id','=','profiles.profile_id')
-                ->where('question_id',$id)
-                ->first();
+        // $data = DB::table('questions')
+        //         ->join('profiles','questions.profile_id','=','profiles.profile_id')
+        //         ->where('question_id',$id)
+        //         ->first();
+
+        $data = Question::find($id);
 
         return view('QuestionDetail', compact('data'));
     }
@@ -79,10 +98,12 @@ class PertanyaanController extends Controller
      */
     public function edit($id)
     {
-        $data = DB::table('questions')
-                ->join('profiles','questions.profile_id','=','profiles.profile_id')
-                ->where('question_id',$id)
-                ->first();
+        // $data = DB::table('questions')
+        //         ->join('profiles','questions.profile_id','=','profiles.profile_id')
+        //         ->where('question_id',$id)
+        //         ->first();
+
+        $data = Question::find($id);
 
         return view('EditQuestion',compact('data'));
     }
@@ -97,17 +118,22 @@ class PertanyaanController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'title' => 'required|unique:questions',
+            'title' => 'required',
             'pertanyaan' => 'required'
         ]);
 
-        $data = DB::table('questions')
-                ->where('question_id',$id)
+        // $data = DB::table('questions')
+        //         ->where('question_id',$id)
+        //         ->update([
+        //             'title' => $request['title'],
+        //             'question' => $request['pertanyaan']
+        //         ]);
+
+        Question::where('question_id',$id)
                 ->update([
                     'title' => $request['title'],
                     'question' => $request['pertanyaan']
                 ]);
-
         return redirect('/pertanyaan')->with('success','Pertanyaan Berhasil Diubah');
     }
 
@@ -119,9 +145,11 @@ class PertanyaanController extends Controller
      */
     public function destroy($id)
     {
-        $data = DB::table('questions')
-                ->where('question_id','=',$id)
-                ->delete();
+        // $data = DB::table('questions')
+        //         ->where('question_id','=',$id)
+        //         ->delete();
+
+        Question::destroy($id);
 
         return redirect('/pertanyaan')->with('success','Pertanyaan Berhasil Dihapus');
     }
